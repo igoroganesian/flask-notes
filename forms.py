@@ -1,3 +1,5 @@
+"""Forms for Notes App"""
+
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField
 from wtforms.validators import InputRequired, URL
@@ -17,3 +19,12 @@ class CreateUserForm(FlaskForm):
                            validators=[InputRequired()])
     last_name = StringField("Last name",
                            validators=[InputRequired()])
+
+
+class UserLoginForm(FlaskForm):
+    """ form for logging in User instance """
+
+    username = StringField("Username",
+                           validators=[InputRequired()])
+    password = PasswordField("Password",
+                            validators=[InputRequired()])

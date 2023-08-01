@@ -1,3 +1,5 @@
+"""Models for Notes App"""
+
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 
@@ -6,7 +8,7 @@ bcrypt = Bcrypt()
 db = SQLAlchemy()
 
 class User(db.Model):
-
+    """User"""
     __tablename__ = "users"
 
     username = db.Column(
@@ -42,6 +44,16 @@ class User(db.Model):
         hashed = bcrypt.generate_password_hash(password).decode('utf8')
 
         return cls(username=username, password=hashed)
+
+    @classmethod
+    def authenticate(cls, username, password):
+
+        u = cls.query.filter_by(username=username).one_or_none()
+
+        if u and bcrypt.check_password_hash(u.password, password):
+            return u
+        else:
+            return False
 
 def connect_db(app):
     """Connect this database to provided Flask app"""

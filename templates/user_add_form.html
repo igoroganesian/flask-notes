@@ -18,7 +18,20 @@
 
   {% endfor %}
 
-  <button type="submit">Register</button>
+  <button type="submit" class="btn btn-outline-dark">Register</button>
 </form>
+
+<div class="flash_messages">
+  {% with messages = get_flashed_messages() %}
+  {% if messages %}
+  <ul class=flashes>
+    {% for message in messages %}
+    <li>{{ message }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+
+  {% endwith %}
+</div>
 
 {% endblock %}
