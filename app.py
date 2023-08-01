@@ -1,18 +1,20 @@
 import os
 
-from flask import Flask, render_template, redirect, session, flash, Response
+from flask import Flask, render_template, redirect, session, flash
+# Response
 # from flask_debugtoolbar import DebugToolbarExtension
 
 from models import connect_db, db, User
 
-from forms import CreateUserForm, UserLoginForm
+from forms import CreateUserForm, UserLoginForm, CSRFForm
 
 app = Flask(__name__)
 
 app.config['SECRET_KEY'] = "secret"
+# add .env for key!
 
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get(
-    "DATABASE_URL", "postgresql:///???")
+    "DATABASE_URL", "postgresql:///users")
 
 app.config['SQLALCHEMY_ECHO'] = True
 
@@ -39,14 +41,12 @@ def register():
         first_name = form.first_name.data
         last_name = form.last_name.data
 
-        hashed_user  = User.register(username, password)
-
-        new_user = User(
-            username=username,
-            password=hashed_user.password,
-            email=email,
-            first_name=first_name,
-            last_name=last_name
+        new_user = User.register(
+            username,
+            password,
+            email,
+            first_name,
+            last_name
             )
 
         db.session.add(new_user)
@@ -54,11 +54,11 @@ def register():
 
         session["username"] = new_user.username
 
-
         return redirect(f'/users/{new_user.username}')
 
     else:
         return render_template("user_add_form.html", form=form)
+
 
 @app.route('/login', methods=["GET", "POST"])
 def login():
@@ -77,7 +77,9 @@ def login():
         else:
             form.username.errors = ["Bad name/password"]
 
-    return render_template('/login', form=form)
+    return render_template('user_login_form.html', form=form)
+
+#TODO: redirect if logged in
 
 
 @app.get('/users/<username>')
@@ -85,12 +87,20 @@ def show_user_info(username):
     """Validate user and if validated, show user info page. Redirect to root
     page if not authorized."""
 
-    if username not in session:
-        flash("You must be logged in to view")
+    form = CSRFForm()
+
+    if "username" not in session:
+        flash("You must be logged in to view user page")
+        #TODO: forbid other users
         return redirect("/")
 
+    #TODO: import werkzeug errors
 
     user = User.query.get_or_404(username)
+    # breakpoint()
+    return render_template('user_info.html', user=user, form=form)
+
+    # \/ if above not an option
 
     # username = user.username
     # email = user.email
@@ -99,11 +109,19 @@ def show_user_info(username):
 
     # user_info = [username, email, first_name, last_name]
 
-    return render_template("user_info.html", user=user)
 
 
-@app.errorhandler(404)
-def access_denied():
-    return Response("You must be logged in to view", 404)
+@app.post('/logout')
+def logout_user():
+    """ logs user out and redirects to homepage """
+
+    form = CSRFForm()
+
+    if form.validate_on_submit():
+        #TODO: message if invalid
+        session.pop("username", None)
+
+    return redirect('/')
+
 
 

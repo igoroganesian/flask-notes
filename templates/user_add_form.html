@@ -6,8 +6,7 @@
 
 <form id="user-add-form" method="POST">
   {{ form.hidden_tag() }}
-  {% for field in form if field.widget.input_type !=
-  'hidden' %}
+  {% for field in form if field.widget.input_type != 'hidden' %}
 
   <p>
     {{ field.label }} {{ field }}

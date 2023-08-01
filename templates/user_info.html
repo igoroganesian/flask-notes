@@ -4,9 +4,8 @@
 
 {% block content %}
 
-    <h1>{{ user_info.first_name }} {{ user_info.last_name }}</h1>
-    <p>Email: {{ user_info.email }}</p>
-
+    <h1>{{ user.first_name }} {{ user.last_name }}</h1>
+    <p>Email: {{ user.email }}</p>
 
     <form action="/logout" method="POST">
       {{form.hidden_tag()}}

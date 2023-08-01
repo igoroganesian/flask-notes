@@ -8,7 +8,9 @@ bcrypt = Bcrypt()
 db = SQLAlchemy()
 
 class User(db.Model):
-    """User"""
+    """ class for User instance with password, email, first and last name;
+        username as primary key """
+
     __tablename__ = "users"
 
     username = db.Column(
@@ -38,15 +40,24 @@ class User(db.Model):
     )
 
     @classmethod
-    def register(cls, username, password):
-        """ register user with hashed password & return user"""
+    def register(cls, username, password, email, first_name, last_name):
+        """ register user with hashed password & return user instance """
 
         hashed = bcrypt.generate_password_hash(password).decode('utf8')
 
-        return cls(username=username, password=hashed)
+        return cls(
+            username=username,
+            password=hashed,
+            email=email,
+            first_name=first_name,
+            last_name=last_name
+            )
+
 
     @classmethod
     def authenticate(cls, username, password):
+        """ authenticates username and password;
+            returns user instance or False"""
 
         u = cls.query.filter_by(username=username).one_or_none()
 
@@ -54,6 +65,7 @@ class User(db.Model):
             return u
         else:
             return False
+
 
 def connect_db(app):
     """Connect this database to provided Flask app"""
