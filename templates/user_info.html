@@ -12,5 +12,14 @@
       <button type="submit" class="btn btn-outline-dark">Logout</button>
     </form>
 
+    <ul>
+    {% for note in notes %}
+      <li>
+        <a href="/notes/{{ note.id }}/update"></a>
+        <button>X</button>
+        {{ note.title }} {{ note.content }}
+      </li>
+    {% endfor %}
+    </ul>
 
 {% endblock %}

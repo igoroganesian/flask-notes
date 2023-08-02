@@ -10,9 +10,11 @@ from forms import CreateUserForm, UserLoginForm, CSRFForm
 
 from werkzeug.exceptions import Unauthorized
 
-API_SECRET_KEY = os.environ['API_SECRET_KEY']
+# API_SECRET_KEY = 'secret'
 
 app = Flask(__name__)
+
+app.config['SECRET_KEY'] = os.environ['API_SECRET_KEY']
 
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get(
     "DATABASE_URL", "postgresql:///users")
@@ -98,21 +100,15 @@ def show_user_info(username):
         #flash("You must be logged in to view user page")
         raise Unauthorized()
 
-
-
     user = User.query.get_or_404(username)
-    # breakpoint()
-    return render_template('user_info.html', user=user, form=form)
+    notes = user.notes
 
-    # \/ if above not an option
-
-    # username = user.username
-    # email = user.email
-    # first_name = user.first_name
-    # last_name = user.last_name
-
-    # user_info = [username, email, first_name, last_name]
-
+    return render_template(
+        'user_info.html',
+        user=user,
+        form=form,
+        notes=notes
+        )
 
 
 @app.post('/logout')

@@ -39,6 +39,8 @@ class User(db.Model):
         nullable=False
     )
 
+    notes = db.relationship('Note', backref='user')
+
     @classmethod
     def register(cls, username, password, email, first_name, last_name):
         """ register user with hashed password & return user instance """
@@ -74,7 +76,7 @@ class Note(db.Model):
     id = db.Column(
         db.Integer,
         primary_key=True,
-        auto_incrementing=True,
+        autoincrement=True,
         nullable=False
     )
 
