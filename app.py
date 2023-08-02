@@ -1,6 +1,6 @@
 import os
 
-from flask import Flask, render_template, redirect, session, flash
+from flask import Flask, render_template, redirect, session
 # Response
 # from flask_debugtoolbar import DebugToolbarExtension
 
@@ -8,15 +8,16 @@ from models import connect_db, db, User
 
 from forms import CreateUserForm, UserLoginForm, CSRFForm
 
-app = Flask(__name__)
+from werkzeug.exceptions import Unauthorized
 
-app.config['SECRET_KEY'] = "secret"
-# add .env for key!
+API_SECRET_KEY = os.environ['API_SECRET_KEY']
+
+app = Flask(__name__)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get(
     "DATABASE_URL", "postgresql:///users")
 
-app.config['SQLALCHEMY_ECHO'] = True
+#app.config['SQLALCHEMY_ECHO'] = True
 
 connect_db(app)
 
@@ -63,6 +64,10 @@ def register():
 @app.route('/login', methods=["GET", "POST"])
 def login():
     """Display and handle user login. Accepts username and password. """
+
+    if "username" in session:
+        return redirect(f'/users/{session["username"]}')
+
     form = UserLoginForm()
 
     if form.validate_on_submit():
@@ -79,7 +84,7 @@ def login():
 
     return render_template('user_login_form.html', form=form)
 
-#TODO: redirect if logged in
+
 
 
 @app.get('/users/<username>')
@@ -89,12 +94,11 @@ def show_user_info(username):
 
     form = CSRFForm()
 
-    if "username" not in session:
-        flash("You must be logged in to view user page")
-        #TODO: forbid other users
-        return redirect("/")
+    if "username" not in session or session["username"] != username:
+        #flash("You must be logged in to view user page")
+        raise Unauthorized()
 
-    #TODO: import werkzeug errors
+
 
     user = User.query.get_or_404(username)
     # breakpoint()
@@ -118,8 +122,9 @@ def logout_user():
     form = CSRFForm()
 
     if form.validate_on_submit():
-        #TODO: message if invalid
         session.pop("username", None)
+    else:
+        raise Unauthorized()
 
     return redirect('/')
 
